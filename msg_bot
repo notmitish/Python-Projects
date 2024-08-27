@@ -1,0 +1,41 @@
+import discord
+from discord.ext import commands
+
+TOKEN = 'bot_token'
+
+intents = discord.Intents.default()  
+intents.message_content = True       
+
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+TARGET_CHANNEL_ID = <channel_id>
+
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
+    print('------')
+    print('Bot is ready to send messages!')
+
+def is_admin():
+    def predicate(ctx):
+        return ctx.author.guild_permissions.administrator
+    return commands.check(predicate)
+
+@bot.command(name='msg', help='Sends a message to a specific channel')
+@is_admin()  
+async def send_message(ctx, *, message: str):
+    """
+    Command to send a message to a specific channel.
+    Usage: !msg <message>
+    """
+
+    target_channel = bot.get_channel(TARGET_CHANNEL_ID)
+
+    if target_channel is None:
+        await ctx.send('The target channel was not found. Please check the channel ID.')
+        return
+
+    await target_channel.send(message)
+    await ctx.send(f'Message succesfully sent to {target_channel.mention}.')
+
+bot.run(TOKEN)
